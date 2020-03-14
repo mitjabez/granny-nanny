@@ -63,11 +63,9 @@ test -n "$found_device" && die "device $device_name already exists"
 echo "Generating certificates:"
 public_cert_path="${device_path}/${device_name}_public.pem"
 private_cert_path="${device_path}/${device_name}_private.pem"
-csr_path="${device_path}/${device_name}.csr"
 
-openssl genpkey -algorithm RSA -out "$private_cert_path" -pkeyopt rsa_keygen_bits:2048
-openssl req -new -sha256 -key "$private_cert_path" -out "$csr_path" -subj "/CN=$device_name"
-openssl x509 -req -in "$csr_path" -CA "${infra_path}/rsa_cert.pem" -CAkey "${infra_path}/rsa_private.pem" -CAcreateserial -sha256 -out "$public_cert_path"
+openssl ecparam -genkey -name prime256v1 -noout -out "$private_cert_path"
+openssl ec -in "$private_cert_path" -pubout -out "$public_cert_path"
 
 # Create devices
 echo
@@ -75,4 +73,4 @@ echo "Creating device:"
 gcloud iot --project "$project" devices create $device_name \
   --region=$region_name \
   --registry=$registry_name \
-  --public-key=path=$public_cert_path,type=rsa-x509-pem
+  --public-key=path=$public_cert_path,type=es256-pem
