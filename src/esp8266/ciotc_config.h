@@ -1,32 +1,16 @@
-/******************************************************************************
- * Copyright 2018 Google
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *****************************************************************************/
-// This file contains your configuration used to connect to Cloud IoT Core
-
 // WIFI
-const char* ssid = "SSID";
-const char* password = "PASSWORD";
+const char* ssid = "***REMOVED***";
+const char* password = "***REMOVED***";
 
 // Cloud iot details.
-const char* project_id = "project-id";
-const char* location = "us-central1";
-const char* registry_id = "my-registry";
-const char* device_id = "my-device";
+const char* project_id = "***REMOVED***";
+const char* location = "europe-west1";
+const char* registry_id = "gnanny-dev";
+const char* device_id = "esp8266";
 
 // Configuration for NTP
-const char* ntp_primary = "pool.ntp.org";
-const char* ntp_secondary = "time.nist.gov";
+const char* ntp_primary = "ntp1.arnes.si";
+const char* ntp_secondary = "pool.ntp.org";
 
 // To get the private key run (where private-key.pem is the ec private key
 // used to create the certificate uploaded to google cloud iot):
@@ -37,9 +21,9 @@ const char* ntp_secondary = "time.nist.gov";
 // it's smaller add "00:" to the start. If it's too big or too small something
 // is probably wrong with your key.
 const char* private_key_str =
-    "5a:2e:06:b5:c1:f2:9c:b3:77:b2:89:f5:29:29:93:"
-    "07:fd:ed:22:0d:03:2b:a6:b1:b6:04:0b:d5:9b:49:"
-    "7d:ca";
+    "c7:d2:5c:98:0a:e1:ec:62:96:de:52:ea:1a:8b:8f:"
+    "26:d4:0f:15:19:dc:41:29:32:bc:fe:aa:31:c1:fa:"
+    "90:20";
 
 // Time (seconds) to expire token += 20 minutes for drift
 const int jwt_exp_secs = 3600; // Maximum 24H (3600*24)
