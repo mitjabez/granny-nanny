@@ -10,7 +10,3 @@ variable "region" {
   type = string
   description = "GCP region"
 }
-variable "certificate_file" {
-  type = string
-  description = "Path to the PEM public key certificate file"
-}
