@@ -1,5 +1,8 @@
-#ifndef __ESP8266_MQTT_H__
-#define __ESP8266_MQTT_H__
+#ifndef MQTT_H
+#define MQTT_H
+
+// Based on https://github.com/GoogleCloudPlatform/google-cloud-iot-arduino
+
 #include <ESP8266WiFi.h>
 #include "FS.h"
 
@@ -13,15 +16,12 @@
 
 #include <CloudIoTCore.h>
 #include <CloudIoTCoreMqtt.h>
-#include "ciotc_config.h" // Wifi configuration here
+#include "config.h" // Wifi configuration here
 
-// !!REPLACEME!!
-// The MQTT callback function for commands and configuration updates
-// Place your message handler code here.
-void messageReceived(String &topic, String &payload)
-{
+void messageReceived(String &topic, String &payload) {
     Serial.println("incoming: " + topic + " - " + payload);
 }
+
 ///////////////////////////////
 
 // Initialize WiFi and MQTT for this board
@@ -36,13 +36,7 @@ String jwt;
 ///////////////////////////////
 // Helpers specific to this board
 ///////////////////////////////
-String getDefaultSensor()
-{
-    return "Wifi: " + String(WiFi.RSSI()) + "db";
-}
-
-String getJwt()
-{
+String getJwt() {
     // Disable software watchdog as these operations can take a while.
     ESP.wdtDisable();
     iat = time(nullptr);
@@ -52,8 +46,7 @@ String getJwt()
     return jwt;
 }
 
-void setupCert()
-{
+void setupCert() {
     // Set CA cert on wifi client
     // If using a static (pem) cert, uncomment in ciotc_config.h:
     certList.append(primary_ca);
@@ -63,46 +56,40 @@ void setupCert()
     return;
 }
 
-void setupWifi()
-{
+void setupWifi() {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
-    Serial.println("Connecting to WiFi");
-    while (WiFi.status() != WL_CONNECTED)
-    {
-        delay(100);
+    Serial.print("Connecting to WiFi");
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(500);
     }
+    Serial.println("Connected!");
 
     configTime(0, 0, ntp_primary, ntp_secondary);
     Serial.println("Waiting on time sync...");
-    while (time(nullptr) < 1510644967)
-    {
+    while (time(nullptr) < 1510644967) {
         delay(10);
     }
 }
 
-void connectWifi()
-{
+void connectWifi() {
     Serial.print("checking wifi...");
-    while (WiFi.status() != WL_CONNECTED)
-    {
+    while (WiFi.status() != WL_CONNECTED) {
         Serial.print(".");
         delay(1000);
     }
 }
 
-bool publishTelemetry(String data)
-{
+bool publishTelemetry(String data) {
     return mqtt->publishTelemetry(data);
 }
 
-void connect()
-{
+void connect() {
     mqtt->mqttConnect();
 }
 
-void setupCloudIoT()
-{
+void setupCloudIoT() {
     // Create the device
     device = new CloudIoTCoreDevice(
             project_id, location, registry_id, device_id,
@@ -116,8 +103,9 @@ void setupCloudIoT()
     setupCert();
 
     mqttClient = new MQTTClient(512);
-    mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
+    mqttClient->setOptions(180, true, TIMEOUT); // keepAlive, cleanSession, timeout
     mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+    mqtt->setLogConnect(false);
     mqtt->setUseLts(true);
     mqtt->startMQTT();
 }
