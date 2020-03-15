@@ -1,19 +1,31 @@
-#include <CloudIoTCore.h>
+#include <ESP8266WiFi.h>
 
-#include "mqtt.h"
-
-#define UPDATE_INTERVAL_MS 60000
-#define PHOTO_PIN 2
+#include "config.h"
+#include "sender.h"
 
 bool lightWasOn = false;
+unsigned long lastMillis = 0;
+
+void initWifi() {
+    WiFi.begin(SSID, PSK);
+
+    Serial.print("Connecting to WiFi");
+
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.print("Connected! IP address: ");
+    Serial.println(WiFi.localIP());
+}
 
 void setup() {
     pinMode(PHOTO_PIN, INPUT);
     Serial.begin(115200);
-    setupCloudIoT();
+    initWifi();
+    setupSender();
 }
-
-unsigned long lastMillis = 0;
 
 void readPhotoPin() {
     bool lightPin = digitalRead(PHOTO_PIN);
@@ -23,29 +35,15 @@ void readPhotoPin() {
     lightWasOn |= lightPin;
 }
 
-String readingToJson() {
-    String lightState = lightWasOn ? "true" : "false";
-    return "{\"light\":" + lightState + ",\"uptime\":" + String(millis()) + "}";
-}
-
 void loop() {
-    mqtt->loop();
     // <- fixes some issues with WiFi stability
     delay(10);
-
-    if (!mqttClient->connected()) {
-        ESP.wdtDisable();
-        connect();
-        ESP.wdtEnable(0);
-    }
 
     readPhotoPin();
 
     if (millis() - lastMillis > UPDATE_INTERVAL_MS) {
         lastMillis = millis();
-        String json = readingToJson();
-        Serial.println("Sending: " + json);
-        publishTelemetry(json);
+        sendStatus(lightWasOn, millis());
         // Reset light state
         lightWasOn = false;
     }
