@@ -1,25 +1,22 @@
 from google.cloud import monitoring_v3
+from flask import abort
 
-import base64
 import json
-import dateutil.parser as dp
+import time
+import os
 
 PROJECT = '***REMOVED***'
+API_KEY = '***REMOVED***'
 
 
-def timestamp_to_epoch(timestamp: str):
-    return int(dp.parse(timestamp).strftime('%s'))
-
-
-def write_metric(device_id: str, registry_id: str, light: bool, timestamp_seconds: int):
+def write_metric(light: bool, environment: str, timestamp_seconds: int):
     client = monitoring_v3.MetricServiceClient()
     project_name = client.project_path(PROJECT)
 
     series = monitoring_v3.types.TimeSeries()
     series.metric.type = 'custom.googleapis.com/light'
     series.resource.type = 'global'
-    series.metric.labels['device_id'] = device_id
-    series.metric.labels['registry_id'] = registry_id
+    series.metric.labels['environment'] = environment
     point = series.points.add()
     point.value.int64_value = 1 if light else 0
     point.interval.end_time.seconds = int(timestamp_seconds)
@@ -28,13 +25,22 @@ def write_metric(device_id: str, registry_id: str, light: bool, timestamp_second
     client.create_time_series(project_name, [series])
 
 
-def iot_streamer(event, context):
-    device_id = event['attributes']['deviceId']
-    registry_id = event['attributes']['deviceRegistryId']
-    payload = base64.b64decode(event['data']).decode('utf-8')
-    print(f'Writing: {payload} at {context.timestamp}');
-    decoded_payload = json.loads(payload)
-    light = decoded_payload['light']
-    timestamp_seconds = timestamp_to_epoch(context.timestamp)
-    write_metric(device_id=device_id, registry_id=registry_id, light=light, timestamp_seconds=timestamp_seconds)
+def handle_request(request_json):
+    if request_json and 'light' in request_json:
+        light = request_json['light']
+        write_metric(light=light, environment=os.environ['env'], timestamp_seconds=time.time())
+    else:
+        print(f'Invalid request: {request_json}')
+        return abort(400)
 
+def http_iot_streamer(request):
+    print(f'Handling request {request}')
+
+    if request.method == 'POST' and request.headers['content-type'] == 'application/json':
+        if 'apikey' not in request.args or request.args['apikey'] != API_KEY:
+            return abort(403)
+
+        return handle_request(request.get_json(silent=True))
+    else:
+        print(f'Invalid request {request.headers}')
+        return abort(404)
