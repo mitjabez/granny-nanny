@@ -21,15 +21,15 @@ void sendStatus(bool light, unsigned long uptime) {
     std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
     client->setInsecure();
 
-    if (https.begin(*client, "https://www.google.com")) {
-//        https.setTimeout(TIMEOUT_SECONDS);
-//        https.addHeader("Content-Type", "application/json");
-//        https.setUserAgent(USER_AGENT);
+    if (https.begin(*client, POST_URL)) {
+        https.setTimeout(TIMEOUT);
+        https.addHeader("Content-Type", "application/json");
+        https.setUserAgent(USER_AGENT);
 
-        int responseCode = https.GET(); //https.POST(readingToJson(light, uptime));
+        int responseCode = https.POST(readingToJson(light, uptime));
 
         if (responseCode == HTTP_CODE_OK) {
-            Serial.println("Request sent!");
+            Serial.printf("Request sent: %d\n", responseCode);
         } else {
             Serial.printf("[HTTP] POST... failed, code: %d, error: %s\n", responseCode, https.errorToString(responseCode).c_str());
         }
