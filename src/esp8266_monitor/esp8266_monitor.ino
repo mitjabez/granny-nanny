@@ -2,9 +2,12 @@
 
 #include "config.h"
 #include "sender.h"
+#include "timer.h"
 
+bool isLightOn = false;
 bool lightWasOn = false;
-unsigned long lastMillis = 0;
+Timer lightOnTimer;
+Timer lastHttpUpdateTimer;
 
 void initWifi() {
     WiFi.begin(SSID, PSK);
@@ -25,26 +28,43 @@ void setup() {
     Serial.begin(115200);
     initWifi();
     setupSender();
+    lastHttpUpdateTimer.start();
 }
 
 void readPhotoPin() {
-    bool lightPin = digitalRead(PHOTO_PIN);
-    if (!lightWasOn && lightPin) {
-        Serial.println("Light is ON");
+    bool previousState = isLightOn;
+    isLightOn = digitalRead(PHOTO_PIN);
+
+    if (isLightOn) {
+        if (lightOnTimer.isStarted()) {
+            if (lightOnTimer.elapsedMs() >= LIGHT_TRIGGER_MS) {
+                Serial.println("Light is ON");
+                lightWasOn = true;
+            }
+        } else {
+            lightOnTimer.start();
+        }
+    } else {
+        lightOnTimer.stop();
+
+        if (previousState) {
+            Serial.println("Light is OFF");
+        }
     }
-    lightWasOn |= lightPin;
 }
 
 void loop() {
-    // <- fixes some issues with WiFi stability
+    // Fix some issues with WiFi stability
     delay(10);
 
     readPhotoPin();
 
-    if (millis() - lastMillis > UPDATE_INTERVAL_MS) {
-        lastMillis = millis();
+    if (lastHttpUpdateTimer.elapsedMs() > UPDATE_INTERVAL_MS) {
+        lastHttpUpdateTimer.restart();
+
         sendStatus(lightWasOn, millis());
-        // Reset light state
+
         lightWasOn = false;
+        lightOnTimer.stop();
     }
 }
