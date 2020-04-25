@@ -4,9 +4,11 @@
 #include "sender.h"
 #include "timer.h"
 
+// Is light currently ON
 bool isLightOn = false;
+// If light was on during the last minute
 bool lightWasOn = false;
-Timer lightOnTimer;
+Timer stateChangeTimer;
 Timer lastHttpUpdateTimer;
 
 void initWifi() {
@@ -23,32 +25,35 @@ void initWifi() {
     Serial.println(WiFi.localIP());
 }
 
+void restartState() {
+}
+
 void setup() {
     pinMode(PHOTO_PIN, INPUT);
     Serial.begin(115200);
     initWifi();
-    setupSender();
     lastHttpUpdateTimer.start();
+}
+
+void toggleLight() {
+    if (isLightOn) {
+        Serial.println("Light is ON");
+        lightWasOn = true;
+    } else {
+        Serial.println("Light is OFF");
+    }
 }
 
 void readPhotoPin() {
     bool previousState = isLightOn;
     isLightOn = digitalRead(PHOTO_PIN);
 
-    if (isLightOn) {
-        if (lightOnTimer.isStarted()) {
-            if (lightOnTimer.elapsedMs() >= LIGHT_TRIGGER_MS) {
-                Serial.println("Light is ON");
-                lightWasOn = true;
-            }
-        } else {
-            lightOnTimer.start();
-        }
+    if (previousState != isLightOn) {
+        stateChangeTimer.restart();
     } else {
-        lightOnTimer.stop();
-
-        if (previousState) {
-            Serial.println("Light is OFF");
+        if (stateChangeTimer.isStarted() && stateChangeTimer.elapsedMs() >= LIGHT_TRIGGER_MS) {
+            toggleLight();
+            stateChangeTimer.stop();
         }
     }
 }
@@ -64,7 +69,6 @@ void loop() {
 
         sendStatus(lightWasOn, millis());
 
-        lightWasOn = false;
-        lightOnTimer.stop();
+        lightWasOn = isLightOn;
     }
 }

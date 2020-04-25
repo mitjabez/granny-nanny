@@ -5,12 +5,7 @@
 
 #include "config.h"
 
-
 HTTPClient https;
-
-void setupSender() {
-    // I know this is bad practice, but we're not sending top secret stuff here
-}
 
 String readingToJson(bool light, unsigned long uptime) {
     String lightBoolStr = light ? "true" : "false";
@@ -19,6 +14,7 @@ String readingToJson(bool light, unsigned long uptime) {
 
 void sendStatus(bool light, unsigned long uptime) {
     std::unique_ptr<BearSSL::WiFiClientSecure>client(new BearSSL::WiFiClientSecure);
+    // For production, configure your certificates
     client->setInsecure();
 
     if (https.begin(*client, POST_URL)) {
