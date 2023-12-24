@@ -24,7 +24,7 @@ void sendStatus(bool light, unsigned long uptime) {
 
         int responseCode = https.POST(readingToJson(light, uptime));
 
-        if (responseCode == HTTP_CODE_OK) {
+        if (responseCode == 200 || responseCode == 204) {
             Serial.printf("Request sent: %d\n", responseCode);
         } else {
             Serial.printf("[HTTP] POST... failed, code: %d, error: %s\n", responseCode, https.errorToString(responseCode).c_str());

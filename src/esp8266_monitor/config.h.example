@@ -1,0 +1,18 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+// How often to send data
+#define UPDATE_INTERVAL_MS 60000
+#define PHOTO_PIN 2
+#define TIMEOUT 10000
+
+// How long does the light need to be on, to be detected
+#define LIGHT_TRIGGER_MS 1000
+
+#define USER_AGENT "esp8266"
+#define POST_URL "https://CHANGEME/light/status?apikey=CHANGEME"
+
+#define SSID "CHANGEME"
+#define PSK "CHANGEME"
+
+#endif

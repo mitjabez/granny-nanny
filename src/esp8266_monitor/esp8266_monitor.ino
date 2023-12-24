@@ -25,9 +25,6 @@ void initWifi() {
     Serial.println(WiFi.localIP());
 }
 
-void restartState() {
-}
-
 void setup() {
     pinMode(PHOTO_PIN, INPUT);
     Serial.begin(115200);

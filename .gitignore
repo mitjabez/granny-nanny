@@ -1,5 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv
+venv
+
 # Vim
 *.sw*
 
-# Environments
-infra/environments/*
+# env vars and secrets
+.env.yaml
+config.h
+
