@@ -4,3 +4,7 @@ updates:
     directory: /src/http_iot_streamer
     schedule:
       interval: monthly
+    groups:
+      python-dependencies:
+        patterns:
+          - '*'
