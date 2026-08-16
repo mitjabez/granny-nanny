@@ -1,10 +1,16 @@
 import os
+import sys
+from types import ModuleType
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 os.environ.setdefault('API_KEY', 'test-api-key')
 os.environ.setdefault('ENVIRONMENT', 'test')
 os.environ.setdefault('PROJECT', 'test-project')
+
+metrics = ModuleType('metrics')
+metrics.write_metric = Mock()
+sys.modules['metrics'] = metrics
 
 import main
 
