@@ -1,0 +1,6 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /src/http_iot_streamer
+    schedule:
+      interval: monthly

@@ -36,9 +36,32 @@ The app consists of 2 parts located in `src/`:
 
     ./scripts/deploy.sh
 
+## Run locally
+
+Create a virtual environment and install the service dependencies:
+
+    cd src/http_iot_streamer
+    python3 -m venv .venv
+    source .venv/bin/activate
+    python -m pip install -r requirements.txt
+
+Set the required configuration values, then start the service:
+
+    export API_KEY=local-api-key
+    export ENVIRONMENT=local
+    export PROJECT=your-gcp-project-id
+    python main.py
+
+The service listens on `http://localhost:8080`. To send it a test request:
+
+    curl --data '{"light": true}' --header 'content-type: application/json' \
+      'http://localhost:8080/light/status?apikey=local-api-key'
+
+Valid requests write a metric to Google Cloud Monitoring, so local runs need Google
+Cloud credentials that can write metrics to the selected project.
+
 ## Test
 
 This will send a test payload to the deployed service:
 
     ./scripts/test.sh
-
