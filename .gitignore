@@ -12,3 +12,9 @@ venv
 .env.yaml
 config.h
 
+# Eagle backups and local project state
+*.b#*
+*.s#*
+*.pro
+eagle.epf
+

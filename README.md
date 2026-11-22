@@ -24,6 +24,19 @@ The app consists of 2 parts located in `src/`:
     make flash
 
 
+# Hardware
+
+Eagle PCB and schematic files (plus exported PDFs) are in `hardware/`:
+- `hardware/granny-nanny.sch` / `hardware/granny-nanny-schematic.pdf` — Schematic
+- `hardware/granny-nanny.brd` / `hardware/granny-nanny-board.pdf` — PCB layout
+
+## Known issue: must be powered on in the light
+
+The photocell voltage divider (`R1` + `VR2`) is wired to `GPIO2` on the ESP-01. Because `GPIO2` is a boot-strapping pin that must be `HIGH` at startup, powering on or rebooting the device in the dark (or with the photocell disconnected) allows `VR2` to pull `GPIO2` `LOW`, causing the ESP-01 to hang on boot with both the red and blue LEDs constantly lit.
+
+Make sure there is enough light on the sensor when turning the device on. Once booted, darkness is handled normally.
+
+
 # http_iot_streamer
 
 ## Prerequisites
